@@ -112,7 +112,12 @@ export default function AdminAI() {
     setLoading(true);
     setTimeout(() => {
       const result = processQuery(query);
-      setMessages((prev) => [...prev, { role: "assistant", ...result }]);
+      const assistantMsg: Message = {
+        role: "assistant",
+        content: result.message,
+        data: result.data,
+      };
+      setMessages((prev) => [...prev, assistantMsg]);
       setLoading(false);
     }, 600);
   };
