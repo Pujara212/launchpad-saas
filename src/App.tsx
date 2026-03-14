@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { BookingProvider } from "@/context/BookingContext";
 import BookingPage from "./pages/BookingPage";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminBookings from "./pages/admin/Bookings";
@@ -19,21 +20,23 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
-        <Routes>
-          {/* User booking interface */}
-          <Route path="/" element={<BookingPage />} />
-          {/* Admin panel */}
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/bookings" element={<AdminBookings />} />
-          <Route path="/admin/services" element={<AdminServices />} />
-          <Route path="/admin/staff" element={<AdminStaff />} />
-          <Route path="/admin/availability" element={<AdminAvailability />} />
-          <Route path="/admin/ai" element={<AdminAI />} />
-          {/* Fallback */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <BookingProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* User booking interface */}
+            <Route path="/" element={<BookingPage />} />
+            {/* Admin panel */}
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/bookings" element={<AdminBookings />} />
+            <Route path="/admin/services" element={<AdminServices />} />
+            <Route path="/admin/staff" element={<AdminStaff />} />
+            <Route path="/admin/availability" element={<AdminAvailability />} />
+            <Route path="/admin/ai" element={<AdminAI />} />
+            {/* Fallback */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </BookingProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
