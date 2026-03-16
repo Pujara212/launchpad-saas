@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AdminLayout } from "@/components/layout/AdminLayout";
-import { AVAILABILITY as INITIAL_AVAIL, STAFF, type AvailabilitySlot } from "@/lib/mockData";
+import { AVAILABILITY_WINDOWS, STAFF } from "@/lib/mockData";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,15 +8,33 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Trash2, Clock } from "lucide-react";
 
-const empty = { staffId: "", date: "", startTime: "", endTime: "" };
+const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+interface LocalSlot {
+  id: string;
+  staffId: string;
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+}
+
+const empty: Omit<LocalSlot, "id"> = { staffId: "", dayOfWeek: 1, startTime: "", endTime: "" };
 
 export default function AdminAvailability() {
-  const [slots, setSlots] = useState<AvailabilitySlot[]>(INITIAL_AVAIL);
+  const [slots, setSlots] = useState<LocalSlot[]>(
+    AVAILABILITY_WINDOWS.map((w) => ({
+      id: w.id,
+      staffId: w.staffId,
+      dayOfWeek: w.dayOfWeek,
+      startTime: w.startTime,
+      endTime: w.endTime,
+    }))
+  );
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState(empty);
+  const [form, setForm] = useState<Omit<LocalSlot, "id">>(empty);
 
   const save = () => {
-    if (!form.staffId || !form.date || !form.startTime || !form.endTime) return;
+    if (!form.staffId || !form.startTime || !form.endTime) return;
     setSlots((prev) => [...prev, { ...form, id: `av${Date.now()}` }]);
     setOpen(false);
     setForm(empty);
@@ -28,7 +46,7 @@ export default function AdminAvailability() {
     <AdminLayout title="Availability" subtitle="Define staff availability windows">
       <div className="flex justify-end mb-4">
         <Button onClick={() => setOpen(true)} size="sm" className="h-8 text-xs gap-1.5">
-          <Plus className="w-3.5 h-3.5" /> Add Slot
+          <Plus className="w-3.5 h-3.5" /> Add Window
         </Button>
       </div>
 
@@ -36,7 +54,7 @@ export default function AdminAvailability() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border">
-              {["Staff", "Date", "Start Time", "End Time", "Hours", ""].map((h) => (
+              {["Staff", "Day", "Start Time", "End Time", "Hours", ""].map((h) => (
                 <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-muted-foreground uppercase tracking-wide">
                   {h}
                 </th>
@@ -51,7 +69,7 @@ export default function AdminAvailability() {
               return (
                 <tr key={slot.id} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
                   <td className="px-5 py-3 font-medium text-foreground">{getStaffName(slot.staffId)}</td>
-                  <td className="px-5 py-3 text-muted-foreground">{slot.date}</td>
+                  <td className="px-5 py-3 text-muted-foreground">{DAY_NAMES[slot.dayOfWeek]}</td>
                   <td className="px-5 py-3 text-muted-foreground">{slot.startTime}</td>
                   <td className="px-5 py-3 text-muted-foreground">{slot.endTime}</td>
                   <td className="px-5 py-3">
@@ -60,7 +78,12 @@ export default function AdminAvailability() {
                     </span>
                   </td>
                   <td className="px-5 py-3">
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive" onClick={() => setSlots((prev) => prev.filter((s) => s.id !== slot.id))}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                      onClick={() => setSlots((prev) => prev.filter((s) => s.id !== slot.id))}
+                    >
                       <Trash2 className="w-3.5 h-3.5" />
                     </Button>
                   </td>
@@ -74,7 +97,7 @@ export default function AdminAvailability() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle className="text-sm">Add Availability Slot</DialogTitle>
+            <DialogTitle className="text-sm">Add Availability Window</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
@@ -87,23 +110,41 @@ export default function AdminAvailability() {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs">Date</Label>
-              <Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} className="h-8 text-sm" />
+              <Label className="text-xs">Day of Week</Label>
+              <Select
+                value={String(form.dayOfWeek)}
+                onValueChange={(v) => setForm({ ...form, dayOfWeek: Number(v) })}
+              >
+                <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {DAY_NAMES.map((d, i) => <SelectItem key={i} value={String(i)}>{d}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label className="text-xs">Start Time</Label>
-                <Input type="time" value={form.startTime} onChange={(e) => setForm({ ...form, startTime: e.target.value })} className="h-8 text-sm" />
+                <Input
+                  type="time"
+                  value={form.startTime}
+                  onChange={(e) => setForm({ ...form, startTime: e.target.value })}
+                  className="h-8 text-sm"
+                />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs">End Time</Label>
-                <Input type="time" value={form.endTime} onChange={(e) => setForm({ ...form, endTime: e.target.value })} className="h-8 text-sm" />
+                <Input
+                  type="time"
+                  value={form.endTime}
+                  onChange={(e) => setForm({ ...form, endTime: e.target.value })}
+                  className="h-8 text-sm"
+                />
               </div>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" size="sm" className="h-8 text-xs" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button size="sm" className="h-8 text-xs" onClick={save}>Save Slot</Button>
+            <Button size="sm" className="h-8 text-xs" onClick={save}>Save</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

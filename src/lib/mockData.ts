@@ -14,6 +14,7 @@ export interface Service {
   duration: number; // minutes
   price: number;
   category: ServiceCategory;
+  description?: string;
 }
 
 export interface Staff {
@@ -23,10 +24,11 @@ export interface Staff {
   avatar: string;
 }
 
-export interface AvailabilitySlot {
+// Day-of-week based availability (0=Sun,1=Mon,...,6=Sat)
+export interface AvailabilityWindow {
   id: string;
   staffId: string;
-  date: string; // YYYY-MM-DD
+  dayOfWeek: number; // 0-6
   startTime: string; // HH:MM
   endTime: string;
 }
@@ -51,12 +53,12 @@ export const USERS: User[] = [
 ];
 
 export const SERVICES: Service[] = [
-  { id: "s1", name: "Haircut & Styling", duration: 60, price: 800, category: "Hair" },
-  { id: "s2", name: "Keratin Treatment", duration: 120, price: 3500, category: "Hair" },
-  { id: "s3", name: "Facial - Deep Cleanse", duration: 90, price: 1500, category: "Skin" },
-  { id: "s4", name: "Manicure & Pedicure", duration: 75, price: 1200, category: "Nails" },
-  { id: "s5", name: "Swedish Massage", duration: 60, price: 2000, category: "Wellness" },
-  { id: "s6", name: "Skin Consultation", duration: 30, price: 500, category: "Consultation" },
+  { id: "s1", name: "Haircut & Styling", duration: 60, price: 800, category: "Hair", description: "Professional cut and blow-dry finish" },
+  { id: "s2", name: "Keratin Treatment", duration: 120, price: 3500, category: "Hair", description: "Smooth frizz-free finish for 3 months" },
+  { id: "s3", name: "Facial - Deep Cleanse", duration: 90, price: 1500, category: "Skin", description: "Deep pore cleansing and hydration" },
+  { id: "s4", name: "Manicure & Pedicure", duration: 75, price: 1200, category: "Nails", description: "Complete nail care with polish" },
+  { id: "s5", name: "Swedish Massage", duration: 60, price: 2000, category: "Wellness", description: "Full body relaxation massage" },
+  { id: "s6", name: "Skin Consultation", duration: 30, price: 500, category: "Consultation", description: "Expert skin analysis and advice" },
 ];
 
 export const STAFF: Staff[] = [
@@ -66,75 +68,51 @@ export const STAFF: Staff[] = [
   { id: "st4", name: "Arjun Das", specialization: "Massage Therapist", avatar: "AD" },
 ];
 
-export const AVAILABILITY: AvailabilitySlot[] = [
-  { id: "av1", staffId: "st1", date: "2025-06-15", startTime: "10:00", endTime: "18:00" },
-  { id: "av2", staffId: "st2", date: "2025-06-15", startTime: "09:00", endTime: "17:00" },
-  { id: "av3", staffId: "st3", date: "2025-06-15", startTime: "11:00", endTime: "19:00" },
-  { id: "av4", staffId: "st4", date: "2025-06-15", startTime: "10:00", endTime: "16:00" },
-  { id: "av5", staffId: "st1", date: "2025-06-16", startTime: "10:00", endTime: "18:00" },
-  { id: "av6", staffId: "st2", date: "2025-06-16", startTime: "09:00", endTime: "17:00" },
+// Day-of-week windows so ANY future date will show slots (Mon-Sat = 1-6)
+export const AVAILABILITY_WINDOWS: AvailabilityWindow[] = [
+  // Meena (st1) — Mon to Sat 10:00-18:00
+  { id: "aw1", staffId: "st1", dayOfWeek: 1, startTime: "10:00", endTime: "18:00" },
+  { id: "aw2", staffId: "st1", dayOfWeek: 2, startTime: "10:00", endTime: "18:00" },
+  { id: "aw3", staffId: "st1", dayOfWeek: 3, startTime: "10:00", endTime: "18:00" },
+  { id: "aw4", staffId: "st1", dayOfWeek: 4, startTime: "10:00", endTime: "18:00" },
+  { id: "aw5", staffId: "st1", dayOfWeek: 5, startTime: "10:00", endTime: "18:00" },
+  { id: "aw6", staffId: "st1", dayOfWeek: 6, startTime: "10:00", endTime: "15:00" },
+  // Suresh (st2) — Mon to Fri 09:00-17:00
+  { id: "aw7",  staffId: "st2", dayOfWeek: 1, startTime: "09:00", endTime: "17:00" },
+  { id: "aw8",  staffId: "st2", dayOfWeek: 2, startTime: "09:00", endTime: "17:00" },
+  { id: "aw9",  staffId: "st2", dayOfWeek: 3, startTime: "09:00", endTime: "17:00" },
+  { id: "aw10", staffId: "st2", dayOfWeek: 4, startTime: "09:00", endTime: "17:00" },
+  { id: "aw11", staffId: "st2", dayOfWeek: 5, startTime: "09:00", endTime: "17:00" },
+  // Pooja (st3) — Tue to Sat 11:00-19:00
+  { id: "aw12", staffId: "st3", dayOfWeek: 2, startTime: "11:00", endTime: "19:00" },
+  { id: "aw13", staffId: "st3", dayOfWeek: 3, startTime: "11:00", endTime: "19:00" },
+  { id: "aw14", staffId: "st3", dayOfWeek: 4, startTime: "11:00", endTime: "19:00" },
+  { id: "aw15", staffId: "st3", dayOfWeek: 5, startTime: "11:00", endTime: "19:00" },
+  { id: "aw16", staffId: "st3", dayOfWeek: 6, startTime: "11:00", endTime: "19:00" },
+  // Arjun (st4) — Mon/Wed/Fri/Sat 10:00-16:00
+  { id: "aw17", staffId: "st4", dayOfWeek: 1, startTime: "10:00", endTime: "16:00" },
+  { id: "aw18", staffId: "st4", dayOfWeek: 3, startTime: "10:00", endTime: "16:00" },
+  { id: "aw19", staffId: "st4", dayOfWeek: 5, startTime: "10:00", endTime: "16:00" },
+  { id: "aw20", staffId: "st4", dayOfWeek: 6, startTime: "10:00", endTime: "16:00" },
 ];
 
-export const BOOKINGS: Booking[] = [
-  {
-    id: "b1", userId: "u1", serviceId: "s1", staffId: "st1",
-    startTime: "2025-06-15T10:00:00", endTime: "2025-06-15T11:00:00",
-    status: "confirmed", createdAt: "2025-06-10T08:00:00"
-  },
-  {
-    id: "b2", userId: "u2", serviceId: "s3", staffId: "st2",
-    startTime: "2025-06-15T09:00:00", endTime: "2025-06-15T10:30:00",
-    status: "confirmed", createdAt: "2025-06-11T09:00:00"
-  },
-  {
-    id: "b3", userId: "u3", serviceId: "s4", staffId: "st3",
-    startTime: "2025-06-15T11:00:00", endTime: "2025-06-15T12:15:00",
-    status: "pending", createdAt: "2025-06-12T10:00:00"
-  },
-  {
-    id: "b4", userId: "u4", serviceId: "s5", staffId: "st4",
-    startTime: "2025-06-15T10:00:00", endTime: "2025-06-15T11:00:00",
-    status: "cancelled", createdAt: "2025-06-13T11:00:00"
-  },
-  {
-    id: "b5", userId: "u5", serviceId: "s2", staffId: "st1",
-    startTime: "2025-06-15T12:00:00", endTime: "2025-06-15T14:00:00",
-    status: "confirmed", createdAt: "2025-06-13T12:00:00"
-  },
-  {
-    id: "b6", userId: "u1", serviceId: "s6", staffId: "st2",
-    startTime: "2025-06-16T10:00:00", endTime: "2025-06-16T10:30:00",
-    status: "confirmed", createdAt: "2025-06-14T08:00:00"
-  },
-  {
-    id: "b7", userId: "u2", serviceId: "s1", staffId: "st1",
-    startTime: "2025-06-16T11:00:00", endTime: "2025-06-16T12:00:00",
-    status: "pending", createdAt: "2025-06-14T09:00:00"
-  },
-  {
-    id: "b8", userId: "u3", serviceId: "s5", staffId: "st4",
-    startTime: "2025-06-16T11:00:00", endTime: "2025-06-16T12:00:00",
-    status: "confirmed", createdAt: "2025-06-14T10:00:00"
-  },
-];
+export const BOOKINGS: Booking[] = [];
 
-// Generate available time slots dynamically
+/**
+ * Generate available time slots for a staff on a given date.
+ * Uses day-of-week windows so it works for any future date.
+ */
 export function generateSlots(
   staffId: string,
   date: string,
   serviceDuration: number,
   existingBookings: Booking[]
 ): string[] {
-  const availability = AVAILABILITY.find(
-    (a) => a.staffId === staffId && a.date === date
+  const dayOfWeek = new Date(`${date}T00:00:00`).getDay();
+  const windows = AVAILABILITY_WINDOWS.filter(
+    (w) => w.staffId === staffId && w.dayOfWeek === dayOfWeek
   );
-  if (!availability) return [];
-
-  const slots: string[] = [];
-  const [startH, startM] = availability.startTime.split(":").map(Number);
-  const [endH, endM] = availability.endTime.split(":").map(Number);
-  const startMinutes = startH * 60 + startM;
-  const endMinutes = endH * 60 + endM;
+  if (!windows.length) return [];
 
   const staffBookings = existingBookings.filter(
     (b) =>
@@ -143,22 +121,30 @@ export function generateSlots(
       b.status !== "cancelled"
   );
 
-  for (let min = startMinutes; min + serviceDuration <= endMinutes; min += 30) {
-    const slotStart = min;
-    const slotEnd = min + serviceDuration;
+  const slots: string[] = [];
 
-    const isBooked = staffBookings.some((booking) => {
-      const bStart = new Date(booking.startTime);
-      const bEnd = new Date(booking.endTime);
-      const bStartMin = bStart.getHours() * 60 + bStart.getMinutes();
-      const bEndMin = bEnd.getHours() * 60 + bEnd.getMinutes();
-      return slotStart < bEndMin && slotEnd > bStartMin;
-    });
+  for (const win of windows) {
+    const [startH, startM] = win.startTime.split(":").map(Number);
+    const [endH, endM] = win.endTime.split(":").map(Number);
+    const startMinutes = startH * 60 + startM;
+    const endMinutes = endH * 60 + endM;
 
-    if (!isBooked) {
-      const h = Math.floor(min / 60).toString().padStart(2, "0");
-      const m = (min % 60).toString().padStart(2, "0");
-      slots.push(`${h}:${m}`);
+    for (let min = startMinutes; min + serviceDuration <= endMinutes; min += 30) {
+      const slotEnd = min + serviceDuration;
+
+      const isBooked = staffBookings.some((booking) => {
+        const bStart = new Date(booking.startTime);
+        const bEnd = new Date(booking.endTime);
+        const bStartMin = bStart.getHours() * 60 + bStart.getMinutes();
+        const bEndMin = bEnd.getHours() * 60 + bEnd.getMinutes();
+        return min < bEndMin && slotEnd > bStartMin;
+      });
+
+      if (!isBooked) {
+        const h = Math.floor(min / 60).toString().padStart(2, "0");
+        const m = (min % 60).toString().padStart(2, "0");
+        slots.push(`${h}:${m}`);
+      }
     }
   }
 
