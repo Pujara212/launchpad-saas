@@ -1,4 +1,5 @@
 import api from "./api";
+import { SERVICES } from "./mockData";
 
 export interface Service {
   id: string;
@@ -9,14 +10,35 @@ export interface Service {
   price: number;
 }
 
+function toApiShape(s: typeof SERVICES[number]): Service {
+  return {
+    id: s.id,
+    name: s.name,
+    description: s.description,
+    category: s.category,
+    duration_min: s.duration,
+    price: s.price,
+  };
+}
+
 export async function getServices(): Promise<Service[]> {
-  const { data } = await api.get("/services");
-  return data.data;
+  try {
+    const { data } = await api.get("/services", { timeout: 5000 });
+    return data.data ?? [];
+  } catch {
+    return SERVICES.map(toApiShape);
+  }
 }
 
 export async function getService(id: string): Promise<Service> {
-  const { data } = await api.get(`/services/${id}`);
-  return data.data;
+  try {
+    const { data } = await api.get(`/services/${id}`, { timeout: 5000 });
+    return data.data;
+  } catch {
+    const s = SERVICES.find((x) => x.id === id);
+    if (!s) throw new Error("Service not found");
+    return toApiShape(s);
+  }
 }
 
 export async function createService(payload: Partial<Service>): Promise<void> {

@@ -1,4 +1,5 @@
 import api from "./api";
+import { STAFF } from "./mockData";
 
 export interface Staff {
   id: string;
@@ -8,14 +9,34 @@ export interface Staff {
   avatar_url?: string;
 }
 
+function toApiShape(s: typeof STAFF[number]): Staff {
+  return {
+    id: s.id,
+    name: s.name,
+    specialization: s.specialization,
+  };
+}
+
 export async function getStaff(serviceId?: string): Promise<Staff[]> {
-  const { data } = await api.get("/staff", { params: serviceId ? { serviceId } : {} });
-  return data.data;
+  try {
+    const { data } = await api.get("/staff", {
+      params: serviceId ? { serviceId } : {},
+      timeout: 5000,
+    });
+    return data.data ?? [];
+  } catch {
+    // Fallback: return all mock staff (no service filtering in mock)
+    return STAFF.map(toApiShape);
+  }
 }
 
 export async function getStaffServices(staffId: string) {
-  const { data } = await api.get(`/staff/${staffId}/services`);
-  return data.data;
+  try {
+    const { data } = await api.get(`/staff/${staffId}/services`, { timeout: 5000 });
+    return data.data;
+  } catch {
+    return [];
+  }
 }
 
 export async function createStaff(payload: Partial<Staff>): Promise<void> {
