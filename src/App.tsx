@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/context/AuthContext";
+import { BookingProvider } from "@/context/BookingContext";
 import BookingPage from "./pages/BookingPage";
 import AuthPage from "./pages/AuthPage";
 import AdminDashboard from "./pages/admin/Dashboard";
@@ -22,22 +23,24 @@ const App = () => (
       <Toaster />
       <Sonner />
       <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            {/* Public */}
-            <Route path="/"      element={<BookingPage />} />
-            <Route path="/login" element={<AuthPage />} />
-            {/* Admin */}
-            <Route path="/admin"              element={<AdminDashboard />} />
-            <Route path="/admin/bookings"     element={<AdminBookings />} />
-            <Route path="/admin/services"     element={<AdminServices />} />
-            <Route path="/admin/staff"        element={<AdminStaff />} />
-            <Route path="/admin/availability" element={<AdminAvailability />} />
-            <Route path="/admin/ai"           element={<AdminAI />} />
-            {/* Fallback */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
+        <BookingProvider>
+          <BrowserRouter>
+            <Routes>
+              {/* Public */}
+              <Route path="/"      element={<BookingPage />} />
+              <Route path="/login" element={<AuthPage />} />
+              {/* Admin */}
+              <Route path="/admin"              element={<AdminDashboard />} />
+              <Route path="/admin/bookings"     element={<AdminBookings />} />
+              <Route path="/admin/services"     element={<AdminServices />} />
+              <Route path="/admin/staff"        element={<AdminStaff />} />
+              <Route path="/admin/availability" element={<AdminAvailability />} />
+              <Route path="/admin/ai"           element={<AdminAI />} />
+              {/* Fallback */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </BookingProvider>
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
